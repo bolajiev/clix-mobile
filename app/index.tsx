@@ -59,6 +59,7 @@ export default function HomeScreen() {
   const { switchDirectory, serverHome, recentDirectories } = useConnections()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [homeQuery, setHomeQuery] = useState("")
   const loadedRef = useRef(false)
   const dirSheetRef = useRef<BottomSheet>(null)
   const browserSheetRef = useRef<BottomSheet>(null)
@@ -86,7 +87,12 @@ export default function HomeScreen() {
     }
   }, [loadSessions])
 
-  const groups = useMemo(() => groupByDirectory(sessions), [sessions])
+  const filtered = useMemo(() => {
+    const q = homeQuery.trim().toLowerCase()
+    if (!q) return sessions
+    return sessions.filter((s) => (s.title || s.slug || "").toLowerCase().includes(q))
+  }, [sessions, homeQuery])
+  const groups = useMemo(() => groupByDirectory(filtered), [filtered])
   const count = sessions.length
   const connected = Boolean(activeConnection && sseConnected)
 
@@ -211,6 +217,25 @@ export default function HomeScreen() {
         <View style={styles.iconbtn} />
       </View>
 
+      {/* Session search (adopted from remote-for-opencode Home) */}
+      <View style={[styles.homeSearch, { backgroundColor: theme.card, borderColor: theme.line }]}>
+        <Ionicons name="search" size={15} color={theme.inkFaint} />
+        <TextInput
+          style={[styles.homeSearchInput, { color: theme.ink }]}
+          placeholder={t("home.searchPlaceholder")}
+          placeholderTextColor={theme.inkFaint}
+          value={homeQuery}
+          onChangeText={setHomeQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        {homeQuery ? (
+          <TouchableOpacity onPress={() => setHomeQuery("")} hitSlop={8}>
+            <Ionicons name="close-circle" size={15} color={theme.inkFaint} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
       {/* Connection pill — real state only */}
       <View style={styles.pillRow}>
         <View style={styles.pillRowInner}>
@@ -248,6 +273,39 @@ export default function HomeScreen() {
           />
         }
       >
+        {!homeQuery.trim() && currentByDir.size > 0 && (
+          <View>
+            <View style={styles.groupHeader}>
+              <View style={[styles.groupDot, { backgroundColor: theme.accent }]} />
+              <Text style={[styles.groupLabel, { color: theme.inkSoft }]}>{t("home.continue")}</Text>
+            </View>
+            {[...currentByDir.entries()].slice(0, 3).map(([dir, sid]) => {
+              const session = sessions.find((s) => s.id === sid)
+              if (!session) return null
+              return (
+                <TouchableOpacity
+                  key={sid}
+                  style={[styles.sessionItem, { backgroundColor: theme.card, borderColor: theme.accent }]}
+                  onPress={() => openSession(session.id, session.directory)}
+                >
+                  <View style={[styles.sessionGlyph, { backgroundColor: theme.accentSoft }]}>
+                    <Ionicons name="chatbubble-ellipses" size={16} color={theme.accentDeep} />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={[styles.sessionTitle, { color: theme.ink }]} numberOfLines={1}>
+                      {session.title || session.slug}
+                    </Text>
+                    <Text style={[styles.sessionSub, { color: theme.inkFaint }]}>
+                      {shortDir(dir || "/")} · {session.time?.created ? formatTime(session.time.created, t) : ""}
+                    </Text>
+                  </View>
+                  <Ionicons name="play" size={14} color={theme.accentDeep} />
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        )}
+
         {groups.length === 0 ? (
           <View style={styles.center}>
             <View style={[styles.glyph, { backgroundColor: theme.accentSoft }]}>
@@ -500,6 +558,18 @@ const styles = StyleSheet.create({
   pulse: { width: 8, height: 8, borderRadius: 4 },
   statusText: { fontSize: 12.5, fontWeight: "600" },
   sessionList: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 96 },
+  homeSearch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  homeSearchInput: { flex: 1, fontSize: 14, padding: 0 },
   center: { alignItems: "center", gap: 12, paddingTop: 90 },
   glyph: { width: 76, height: 76, borderRadius: 26, alignItems: "center", justifyContent: "center" },
   emptyTitle: { fontFamily: "SourceSerif4_600SemiBold", fontSize: 22, textAlign: "center" },

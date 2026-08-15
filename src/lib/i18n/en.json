@@ -128,7 +128,9 @@
       "menuHint": "↑↓ to navigate · Enter to pick · Esc to close",
       "noMatches": "No matches for {{query}}"
     },
-    "searchPlaceholder": "Search messages…"
+    "searchPlaceholder": "Search messages…",
+    "changesTitle": "Changes",
+    "noChanges": "No file changes in this session."
   },
   "connection": {
     "shared": {
@@ -470,6 +472,8 @@
       "testsPrompt": "Write tests for this project: find the critical paths and cover them.",
       "fix": "Fix bugs",
       "fixPrompt": "Audit this project for bugs and fix what you find."
-    }
+    },
+    "searchPlaceholder": "Search sessions…",
+    "continue": "Continue"
   }
 }

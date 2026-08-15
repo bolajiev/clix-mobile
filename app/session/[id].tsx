@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  ScrollView,
+  Modal,
 } from "react-native"
 import { useLocalSearchParams, Stack, useRouter, useFocusEffect } from "expo-router"
 import { useTheme } from "../../src/theme/tokens"
@@ -159,6 +161,23 @@ export default function SessionScreen() {
     () => (currentSession?.directory ? (clientForDirectory(currentSession.directory) ?? client) : client),
     [currentSession?.directory, clientForDirectory, client],
   )
+  const [changesOpen, setChangesOpen] = useState(false)
+  const [changes, setChanges] = useState<Array<{ path: string; status: string; additions: number; deletions: number; patch?: string }>>([])
+  const [changesLoading, setChangesLoading] = useState(false)
+
+  const loadChanges = useCallback(async () => {
+    if (!id || !sessionClient) return
+    setChangesLoading(true)
+    try {
+      const diffs = (await sessionClient.session.diff(id)) as Array<{ path: string; status: string; additions: number; deletions: number; patch?: string }>
+      setChanges(diffs || [])
+    } catch {
+      setChanges([])
+    } finally {
+      setChangesLoading(false)
+    }
+  }, [id, sessionClient])
+
 
   // Catalog
   const catalog = useCatalog()
@@ -709,6 +728,17 @@ export default function SessionScreen() {
                   <Text style={[s.dirText, { color: theme.inkSoft }]}>{shortDir}</Text>
                 </View>
               )}
+              <TouchableOpacity
+                onPress={() => {
+                  setChangesOpen((v) => !v)
+                  if (!changesOpen) void loadChanges()
+                }}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Session changes"
+              >
+                <Ionicons name="git-merge-outline" size={20} color={theme.inkSoft} />
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => setSearchOpen((v) => !v)} hitSlop={8}>
                 <Ionicons name="search-outline" size={20} color={theme.inkSoft} />
               </TouchableOpacity>
@@ -977,6 +1007,53 @@ export default function SessionScreen() {
         isDark={isDark}
         onSelect={setVariant}
       />
+
+      {/* Changes panel — file diffs for this session (adopted from
+          remote-for-opencode's ChangesView: per-file rows, +/− counts). */}
+      <Modal
+        visible={changesOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setChangesOpen(false)}
+      >
+        <View style={s.changesBackdrop}>
+          <View style={[s.changesCard, { backgroundColor: theme.card, borderColor: theme.line }]}>
+            <View style={[s.changesHead, { borderBottomColor: theme.line }]}>
+              <Text style={[s.changesTitle, { color: theme.ink }]}>{t("session.changesTitle")}</Text>
+              <TouchableOpacity onPress={() => setChangesOpen(false)} hitSlop={10}>
+                <Ionicons name="close" size={20} color={theme.inkFaint} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: "70%" }} keyboardShouldPersistTaps="always">
+              {changesLoading ? (
+                <ActivityIndicator size="small" color={theme.accent} style={{ marginVertical: 24 }} />
+              ) : changes.length === 0 ? (
+                <Text style={{ fontSize: 13, color: theme.inkFaint, padding: 16, textAlign: "center" }}>
+                  {t("session.noChanges")}
+                </Text>
+              ) : (
+                changes.map((diff) => (
+                  <View key={diff.path} style={[s.changesFile, { borderBottomColor: theme.line }]}>
+                    <Text style={[s.changesPath, { color: theme.ink }]} numberOfLines={1}>
+                      {diff.path}
+                    </Text>
+                    <Text style={s.changesCounts}>
+                      <Text style={{ color: "#7FD88F" }}>+{diff.additions}</Text>
+                      <Text style={{ color: theme.inkFaint }}>  </Text>
+                      <Text style={{ color: "#E06C75" }}>−{diff.deletions}</Text>
+                    </Text>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+            <View style={[s.changesFoot, { borderTopColor: theme.line }]}>
+              <Text style={{ fontSize: 11.5, color: theme.inkFaint }}>
+                {changes.reduce((n, d) => n + d.additions + d.deletions, 0)} lines changed
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   )
 }
@@ -1102,4 +1179,32 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
   },
   bannerAction: { color: "#93c5fd", fontSize: 13, fontWeight: "700" },
+
+  // Changes panel
+  changesBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" },
+  changesCard: { borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 20, maxHeight: "75%" },
+  changesHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  changesTitle: { fontFamily: "SourceSerif4_600SemiBold", fontSize: 18 },
+  changesFile: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  changesPath: { flex: 1, fontSize: 13, fontFamily: "IBMPlexMono_400Regular", paddingRight: 10 },
+  changesCounts: { fontSize: 12.5, fontVariant: ["tabular-nums"] },
+  changesFoot: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    alignItems: "center",
+  },
 })

@@ -128,7 +128,9 @@
       "menuHint": "↑↓ 导航 · 回车选择 · Esc 关闭",
       "noMatches": "没有与 {{query}} 匹配的命令"
     },
-    "searchPlaceholder": "搜索消息…"
+    "searchPlaceholder": "搜索消息…",
+    "changesTitle": "变更",
+    "noChanges": "此会话没有文件变更。"
   },
   "connection": {
     "shared": {
@@ -470,6 +472,8 @@
       "testsPrompt": "为此项目编写测试：找到关键路径并覆盖。",
       "fix": "修复错误",
       "fixPrompt": "审计此项目并修复发现的问题。"
-    }
+    },
+    "searchPlaceholder": "搜索会话…",
+    "continue": "继续"
   }
 }
