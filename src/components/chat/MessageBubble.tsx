@@ -79,11 +79,6 @@ export const MessageBubble = memo(
         ]}
         testID={`chat-bubble-${message.role}`}
       >
-        {!isUser && !grouped && (
-          <View style={[s.avatar, { backgroundColor: theme.ink }]}>
-            <Text style={{ fontFamily: theme.serif, fontWeight: "700", fontSize: 13, color: theme.cream }}>C</Text>
-          </View>
-        )}
         <View style={s.bubbleInner}>
           {/* Role indicator */}
           {!grouped && (
@@ -146,12 +141,14 @@ export const MessageBubble = memo(
             <ToolCallCard key={tool.id} tool={tool} isDark={isDark} />
           ))}
 
-          {/* Tokens/cost for assistant messages */}
+          {/* Tokens/cost for assistant messages — a small meta pill */}
           {!isUser && message.tokens && (
-            <Text style={[s.tokens, { color: theme.inkFaint }]}>
-              {message.tokens.input + message.tokens.output} tokens
-              {message.cost ? ` · $${message.cost.toFixed(4)}` : ""}
-            </Text>
+            <View style={[s.tokensPill, { backgroundColor: theme.cream2 }]}>
+              <Text style={[s.tokens, { color: theme.inkFaint }]}>
+                ⚡ {(message.tokens.input + message.tokens.output) / 1000 >= 1 ? `${((message.tokens.input + message.tokens.output) / 1000).toFixed(1)}k` : message.tokens.input + message.tokens.output} tokens
+                {message.cost ? ` · $${message.cost.toFixed(4)}` : ""}
+              </Text>
+            </View>
           )}
         </View>
       </TouchableOpacity>
@@ -180,13 +177,12 @@ const s = StyleSheet.create({
   // Borderless chat: no bubble boxes. User text right-aligned on the paper,
   // assistant text left-aligned with a small avatar. Content breathes.
   bubble: { marginBottom: 14 },
-  user: { marginLeft: 56, marginTop: 4 },
-  assistant: { marginRight: 12, flexDirection: "row", gap: 10, marginTop: 6 },
-  // P3 grouping: followers of a same-role run are tighter with no avatar
-  groupedAssistant: { marginTop: 1, marginBottom: 2, marginLeft: 38 },
+  user: { alignSelf: "flex-end", maxWidth: "84%", marginTop: 4, paddingLeft: 32 },
+  assistant: { alignSelf: "flex-start", maxWidth: "100%", marginTop: 6, paddingRight: 16 },
+  // P3 grouping: followers of a same-role run are tighter
+  groupedAssistant: { marginTop: 1, marginBottom: 2 },
   groupedUser: { marginTop: 1, marginBottom: 2 },
-  avatar: { width: 28, height: 28, borderRadius: 9, alignItems: "center", justifyContent: "center", marginTop: 2 },
-  bubbleInner: { flex: 1, minWidth: 0 },
+  bubbleInner: { minWidth: 0 },
 
   header: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3 },
   role: { fontSize: 11, fontWeight: "600" },
@@ -203,7 +199,14 @@ const s = StyleSheet.create({
   messageText: { fontSize: 14.5, lineHeight: 22 },
   markdownWrap: { marginHorizontal: -4 },
 
-  tokens: { fontSize: 11, marginTop: 6 },
+  tokens: { fontSize: 11, fontVariant: ["tabular-nums"] },
+  tokensPill: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 8,
+  },
 
   // Images
   imageScroll: { marginBottom: 8 },

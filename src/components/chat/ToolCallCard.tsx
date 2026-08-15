@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react"
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Platform } from "react-native"
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useTranslation } from "react-i18next"
 import type { Part } from "../../lib/sdk"
@@ -391,10 +391,10 @@ export function ToolCallCard({ tool, isDark }: Props) {
       {/* Expanded detail — indented under a hairline rule */}
       {expanded && (
         <View style={[s.detailWrap, { borderLeftColor: theme.line }]}>
-          <ScrollView style={s.detailScroll} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+          <View>
             {error && <ErrorBanner message={error} isDark={isDark} />}
             <ToolDetail tool={tool} isDark={isDark} />
-          </ScrollView>
+          </View>
         </View>
       )}
     </View>
@@ -446,7 +446,7 @@ const s = StyleSheet.create({
   errorText: { fontSize: 12, color: "#dc2626", flex: 1, lineHeight: 18 },
 
   // Detail
-  detailScroll: { maxHeight: 300, marginTop: 2 },
+  detailScroll: { marginTop: 2 },
   detailSection: { gap: 4 },
   detailFile: {
     fontSize: 12,
