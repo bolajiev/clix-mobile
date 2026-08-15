@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bolajiev.github.io/clix-mobile/sitemap.xml

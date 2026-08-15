@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clix — AI coding agent for Android</title>
+<meta name="description" content="Clix is an open-source Android client for the opencode AI coding agent. Stream AI coding sessions from your phone against your own self-hosted opencode server.">
+<style>
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#0a0a0a;color:#eee;line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+  .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700;color:#fff}
+  .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#fab283,#ffc09f);display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-weight:800}
+  h1{font-size:34px;line-height:1.2;margin:40px 0 12px;color:#fff}
+  .lead{font-size:18px;color:#a0a0a0}
+  .cta{display:flex;gap:12px;margin:28px 0;flex-wrap:wrap}
+  a.btn{background:#fab283;color:#0a0a0a;padding:12px 22px;border-radius:10px;font-weight:700;text-decoration:none}
+  a.btn.ghost{background:#1e1e1e;color:#eee;border:1px solid #323232}
+  h2{font-size:22px;color:#fff;margin:44px 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .card{background:#141414;border:1px solid #323232;border-radius:14px;padding:18px}
+  .card h3{margin:0 0 6px;font-size:16px;color:#fff}
+  .card p{margin:0;font-size:14px;color:#a0a0a0}
+  .status{display:inline-block;background:#33261c;color:#ffc09f;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;margin-bottom:8px}
+  code{background:#1e1e1e;padding:2px 6px;border-radius:6px;font-size:13px}
+  a{color:#fab283}
+</style>
+</head>
+<body><div class="wrap">
+  <div class="brand"><div class="logo">C</div> Clix</div>
+
+  <h1>Your AI coding agent, on your phone.</h1>
+  <p class="lead">Clix is an open-source Android client for the <a href="https://opencode.ai">opencode</a> AI coding agent. Stream coding sessions, watch tool calls, approve permissions, and ship code — from your phone, against your own self-hosted server.</p>
+
+  <div class="cta">
+    <a class="btn" href="/clix-mobile/download/">Get the APK</a>
+    <a class="btn ghost" href="/clix-mobile/guide/">Setup guide</a>
+    <a class="btn ghost" href="https://github.com/bolajiev/clix-mobile">GitHub</a>
+  </div>
+
+  <span class="status">Open source · MIT · self-hosted · not on app stores yet</span>
+
+  <h2>What it does</h2>
+  <div class="grid">
+    <div class="card"><h3>Streaming chat</h3><p>Live SSE responses with thinking indicators, streaming cursor, and tool-call rows.</p></div>
+    <div class="card"><h3>One conversation, everywhere</h3><p>Phone and terminal attach to the same server and stay in sync live.</p></div>
+    <div class="card"><h3>Permissions &amp; questions</h3><p>Inline allow/deny cards and one-question-at-a-time pickers.</p></div>
+    <div class="card"><h3>Voice &amp; images</h3><p>Dictate prompts and attach photos — processed on device, sent to your server only.</p></div>
+    <div class="card"><h3>Grouped sessions</h3><p>Conversations organized by project folder, current session highlighted.</p></div>
+    <div class="card"><h3>Dark-first UI</h3><p>opencode palette, Claude-style navigation, borderless chat.</p></div>
+  </div>
+
+  <h2>Project status</h2>
+  <p>Clix is under active development and currently ships as a <strong>direct Android APK</strong>. It is <strong>not yet on Google Play or F-Droid</strong> — those listings do not exist for this app yet. It targets your own self-hosted <code>opencode serve</code> instance; Clix does not run a cloud service.</p>
+
+  <h2>Get started</h2>
+  <p>Run opencode on your machine or server, then connect from the app:</p>
+  <pre><code>opencode serve --hostname 0.0.0.0 --port 4096</code></pre>
+  <p>Full setup: <a href="/clix-mobile/guide/">the guide</a>. For live terminal ↔ phone sync, attach your terminal to the same server: <code>opencode attach http://127.0.0.1:4096</code>.</p>
+
+  <h2>Links</h2>
+  <p>
+    <a href="/clix-mobile/privacy/">Privacy Policy</a> ·
+    <a href="/clix-mobile/download/">Download</a> ·
+    <a href="https://github.com/bolajiev/clix-mobile">Source</a> ·
+    <a href="/clix-mobile/troubleshooting/">Troubleshooting</a>
+  </p>
+</div></body></html>
