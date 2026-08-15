@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clix — Chat Component Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0A0A0A; --fill:#1E1E1E; --card:#141414; --line:#323232;
+    --ink:#EEEEEE; --soft:#A0A0A0; --faint:#8A8A8A;
+    --accent:#FAB283; --accent-soft:#33261C; --accent-deep:#FFC09F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+  header{padding:56px 32px 8px;max-width:1200px;margin:0 auto}
+  header h1{font-family:'Source Serif 4',Georgia,serif;font-size:34px;color:#fff;letter-spacing:-.02em}
+  header p{color:var(--soft);margin-top:8px;font-size:15px;line-height:1.6;max-width:680px}
+  .badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .badge{background:var(--accent-soft);color:var(--accent-deep);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600}
+  .grid{max-width:1200px;margin:32px auto;padding:0 32px 80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .card-head{padding:16px 18px 0;display:flex;align-items:baseline;gap:10px;justify-content:space-between}
+  .card-name{font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em}
+  .card-tag{font-size:11px;color:var(--faint);font-family:'IBM Plex Mono',monospace}
+  .card-desc{padding:4px 18px 0;font-size:12.5px;color:var(--soft);line-height:1.5}
+  .demo{padding:22px 18px;border-top:1px solid var(--line);margin-top:14px;min-height:120px}
+  /* ---- component styles (mirror the app) ---- */
+  .avatar{width:28px;height:28px;border-radius:9px;background:var(--ink);color:var(--bg);font-family:'Source Serif 4',serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mrole{font-size:11px;font-weight:600;color:var(--faint);margin-bottom:3px}
+  .m-user{max-width:82%;color:var(--ink);font-size:14px;line-height:1.55;margin-left:56px;padding:8px 0 0}
+  .m-ai{max-width:92%;display:flex;gap:10px;margin-top:10px}
+  .m-ai .body{font-size:14px;line-height:1.6}
+  .m-ai .body code{background:var(--fill);border-radius:4px;padding:1px 5px;font-family:'IBM Plex Mono',monospace;font-size:12px}
+  .cursor{color:var(--accent);animation:blink 1s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+  .stream{display:flex;align-items:center;gap:10px}
+  .pgrid{width:16px;height:16px;display:grid;grid-template-columns:repeat(3,4px);gap:1.5px}
+  .pgrid i{width:4px;height:4px;border-radius:1px;background:var(--ink);opacity:.15;animation:pixon 650ms ease-in-out infinite}
+  .pgrid i:nth-child(2){animation-delay:90ms}.pgrid i:nth-child(3){animation-delay:180ms}
+  .pgrid i:nth-child(4){animation-delay:90ms}.pgrid i:nth-child(5){animation-delay:180ms}.pgrid i:nth-child(6){animation-delay:270ms}
+  .pgrid i:nth-child(7){animation-delay:180ms}.pgrid i:nth-child(8){animation-delay:270ms}.pgrid i:nth-child(9){animation-delay:360ms}
+  @keyframes pixon{0%,100%{opacity:.15}50%{opacity:.9}}
+  .slabel{font-size:13px;font-weight:500;color:var(--soft)}
+  .selapsed{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .toolrow{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:8px 0}
+  .tname{font-size:12.5px;font-weight:500;color:var(--ink);white-space:nowrap}
+  .tchip{flex:1;min-width:0;font-size:11.5px;color:var(--soft);background:var(--fill);border-radius:999px;padding:3px 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-family:'IBM Plex Mono',monospace}
+  .tok{color:#22C55E;font-size:14px}
+  .tchev{color:var(--faint);font-size:11px;transition:transform .2s}
+  .toolrow.open .tchev{transform:rotate(180deg)}
+  .tdetail{border-left:1px solid var(--line);margin:4px 0 0 20px;padding-left:12px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--soft);line-height:1.7}
+  .tdetail .add{color:#22C55E}
+  .reason{display:inline-flex;align-items:center;gap:5px;background:var(--accent-soft);color:var(--accent-deep);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:600}
+  .perm{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .perm .pt{font-size:14px;font-weight:700;color:var(--ink)}
+  .perm .ps{font-size:12px;color:var(--soft);margin-top:2px;line-height:1.5}
+  .perm .btns{display:flex;gap:8px;margin-top:12px}
+  .perm .btn{flex:1;text-align:center;font-size:13px;font-weight:700;padding:9px;border-radius:10px}
+  .perm .deny{background:var(--fill);color:var(--soft)}
+  .perm .always{background:var(--ink);color:var(--bg)}
+  .perm .allow{background:var(--accent);color:var(--bg)}
+  .quest{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .quest .qh{font-size:13.5px;font-weight:500;color:var(--ink);line-height:19px}
+  .opt{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
+  .rad{width:16px;height:16px;border-radius:8px;border:1.5px solid var(--faint);display:flex;align-items:center;justify-content:center}
+  .rad.sel{background:var(--ink)}
+  .rad.sel .dot{width:5px;height:5px;border-radius:3px;background:var(--bg)}
+  .opt-t{font-size:13px;font-weight:500;color:var(--soft)}
+  .opt-t.sel{color:var(--ink)}
+  .opt-d{font-size:11.5px;color:var(--faint)}
+  .qfoot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+  .qdots{flex:1;display:flex;gap:6px}
+  .qdot{width:7px;height:7px;border-radius:4px;background:var(--faint)}
+  .qdot.sel{width:9px;height:9px;border:2.5px solid var(--ink);background:transparent}
+  .qsend{width:28px;height:28px;border-radius:9px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg)}
+  .pillrow{display:flex;gap:6px;margin-bottom:6px}
+  .pill{font-size:12px;font-weight:700;background:var(--fill);color:var(--soft);padding:4px 10px;border-radius:999px;display:flex;align-items:center;gap:5px}
+  .pill.c{color:var(--accent-deep);background:var(--accent-soft)}
+  .adot{width:7px;height:7px;border-radius:4px;background:var(--accent)}
+  .composer{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px;position:relative;overflow:hidden}
+  .crow{display:flex;align-items:center;gap:8px}
+  .cbtn{width:40px;height:40px;border-radius:12px;background:var(--fill);color:var(--soft);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .cbtn.on{background:var(--accent-soft);color:var(--accent-deep)}
+  .cinput{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-family:'Inter';font-size:15px;padding:10px 4px}
+  .modelpill{color:var(--soft);font-size:12px;font-weight:700;padding:6px 8px;display:flex;align-items:center;gap:3px}
+  .modelpill.on{background:var(--accent-soft);color:var(--accent-deep);border-radius:12px}
+  .csend{width:40px;height:40px;border-radius:20px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg)}
+  .eq{display:flex;align-items:center;gap:2.5px;height:16px;padding:0 12px}
+  .eq i{width:2.5px;border-radius:2px;background:#fff;animation:eqb 900ms ease-in-out infinite}
+  .eq i:nth-child(2){animation-delay:150ms}.eq i:nth-child(3){animation-delay:300ms}
+  @keyframes eqb{0%,100%{height:6px}50%{height:14px}}
+  .banner{background:#065f46;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:500;color:#fff}
+  .banner.stuck{background:#7f1d1d}
+  .banner.reco{background:#92400e}
+  .imgrow{display:flex;gap:8px}
+  .img{width:64px;height:64px;border-radius:8px;background:var(--fill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:22px;position:relative}
+  .img .x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:10px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid var(--bg)}
+  .mini-head{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Clix — Chat Component Library</h1>
+  <p>Every piece of the chat interface from the app, rendered live and labeled. Matches the shipped design: opencode dark palette, borderless chat, compact tool rows, approval-card questions.</p>
+  <div class="badges">
+    <span class="badge">Expo SDK 54 · RN 0.81</span>
+    <span class="badge">Dark-first</span>
+    <span class="badge">Com.s.clix.mobile</span>
+    <span class="badge">MIT</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- MessageBubble -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">MessageBubble</span><span class="card-tag">borderless · user + assistant</span></div>
+    <div class="card-desc">User text right-aligned on the paper; assistant with serif avatar, model tag, copy button, and a streaming cursor while the reply is in progress.</div>
+    <div class="demo">
+      <div class="mini-head">User</div>
+      <div class="m-user">Run the purge audit and report what's left.</div>
+      <div class="mini-head" style="margin-top:14px">Assistant · deepseek-v4-flash · copying</div>
+      <div class="m-ai"><div class="avatar">C</div>
+        <div class="body">Zero references left. Swept <code>dzianisv</code> and old package IDs across 130+ files.<span class="cursor">▍</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- StreamingLoader -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">StreamingLoader</span><span class="card-tag">pixel grid + elapsed</span></div>
+    <div class="card-desc">In-flow "thinking" indicator: 9-cell chevron wavefront, shimmer label, live elapsed timer in mono tabular figures.</div>
+    <div class="demo">
+      <div class="stream">
+        <span class="pgrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="slabel">Thinking through the plan…</span>
+        <span class="selapsed" id="t1">0.0s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ToolRow -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">ToolRow</span><span class="card-tag">compact · expandable</span></div>
+    <div class="card-desc">Tool calls as rows: icon, label, mono chip (the file/command it touched), status, chevron. Tap to expand details under a hairline rule.</div>
+    <div class="demo">
+      <div class="toolrow open"><span class="tname">🔍 grep</span><span class="tchip">src/ · 131 matches</span><span class="tok">✓</span><span class="tchev">▲</span></div>
+      <div class="tdetail">> grep -rn "agentlabs" src/<br><span class="add">+ 0 matches remaining</span></div>
+      <div class="toolrow"><span class="tname">✏️ Write 204 lines</span><span class="tchip">links.ts</span><span class="tok">✓</span><span class="tchev">▼</span></div>
+      <div class="toolrow"><span class="tname">▶ Bash</span><span class="tchip">npm run freeze</span><span class="tok">✓</span><span class="tchev">▼</span></div>
+    </div>
+  </div>
+
+  <!-- ReasoningBlock -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">ReasoningBlock</span><span class="card-tag">thought chip</span></div>
+    <div class="card-desc">Reasoning collapses into a small accent-soft pill; tap to expand the model's chain of thought inline.</div>
+    <div class="demo">
+      <div class="reason">✦ Thought… <span style="opacity:.6">▾</span></div>
+    </div>
+  </div>
+
+  <!-- PermissionPrompt -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">PermissionPrompt</span><span class="card-tag">allow / always / deny</span></div>
+    <div class="card-desc">Inline approval card for tool permissions — clear scope, three choices, no popups. (Server currently allows everything, but the UI is wired.)</div>
+    <div class="demo">
+      <div class="perm">
+        <div class="pt">Allow bash?</div>
+        <div class="ps">The agent wants to run <code>git push origin main</code> on your server.</div>
+        <div class="btns"><div class="btn deny">Deny</div><div class="btn always">Always</div><div class="btn allow">Allow</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QuestionPrompt -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">QuestionPrompt</span><span class="card-tag">options + pager + send</span></div>
+    <div class="card-desc">One question at a time with radio/check options, custom answer, pager dots, and an arrow-send footer.</div>
+    <div class="demo">
+      <div class="quest">
+        <div class="qh">Which color would you like to pick?</div>
+        <div class="opt"><div class="rad sel"><span class="dot"></span></div><div><div class="opt-t sel">Red</div><div class="opt-d">The color red</div></div></div>
+        <div class="opt"><div class="rad"></div><div><div class="opt-t">Green</div><div class="opt-d">The color green</div></div></div>
+        <div class="opt"><div class="rad"></div><div><div class="opt-t">Blue</div><div class="opt-d">The color blue</div></div></div>
+        <div class="qfoot">
+          <span class="qdots"><span class="qdot sel"></span><span class="qdot"></span><span class="qdot"></span></span>
+          <span class="qsend">↑</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PromptBar -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">PromptBar</span><span class="card-tag">the composer</span></div>
+    <div class="card-desc">Attach, inline model picker, dictation (animated equalizer), auto-grow input, ink send button. Rainbow sweep glides across on model change.</div>
+    <div class="demo">
+      <div class="pillrow"><span class="pill"><span class="adot"></span>build</span><span class="pill c">deepseek-v4-flash</span></div>
+      <div class="composer">
+        <div class="crow">
+          <span class="cbtn on">＋</span>
+          <span class="cinput">Message Clix…</span>
+          <span class="modelpill">deepseek-v4-flash ▾</span>
+          <span class="eq"><i></i><i></i><i></i></span>
+          <span class="csend">↑</span>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--faint)">State shown: listening (dictation equalizer active)</div>
+    </div>
+  </div>
+
+  <!-- Banners -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">Banners</span><span class="card-tag">status strip</span></div>
+    <div class="card-desc">Thin status banners: reconnect attempts, connected flash, stuck-session warning, pending message revert.</div>
+    <div class="demo" style="display:flex;flex-direction:column;gap:8px">
+      <div class="banner">Connected ✓</div>
+      <div class="banner reco">Reconnecting… (attempt 2)</div>
+      <div class="banner stuck">No response from the server — model may not be configured.</div>
+      <div class="banner" style="background:#1e3a8a">Message reverted — resend to confirm <span style="float:right;font-weight:700">Undo</span></div>
+    </div>
+  </div>
+
+  <!-- ImageAttachments -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">ImageAttachments</span><span class="card-tag">preview chips</span></div>
+    <div class="card-desc">Attached images before sending — thumbnail with a remove button, auto-compressed to JPEG base64 on send.</div>
+    <div class="demo">
+      <div class="mini-head">Before send</div>
+      <div class="imgrow">
+        <div class="img">🖼<span class="x">✕</span></div>
+        <div class="img">🖼<span class="x">✕</span></div>
+        <div class="img">🖼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- StatusIndicator -->
+  <div class="card">
+    <div class="card-head"><span class="card-name">StatusIndicator</span><span class="card-tag">session status</span></div>
+    <div class="card-desc">Slim bar for retry states; normal busy renders the in-flow StreamingLoader instead. Session status text streams live from SSE.</div>
+    <div class="demo">
+      <div class="stream"><span class="pgrid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="slabel">Applying patch…</span><span class="selapsed">2m 14s</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var t0 = Date.now();
+  var el = document.getElementById('t1');
+  setInterval(function () {
+    var s = (Date.now() - t0) / 1000;
+    el.textContent = s < 60 ? s.toFixed(1) + 's' : Math.floor(s / 60) + 'm ' + Math.round(s % 60) + 's';
+  }, 100);
+</script>
+</body>
+</html>
