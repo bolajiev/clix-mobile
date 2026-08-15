@@ -1,0 +1,487 @@
+import { useState, useCallback } from "react"
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Platform } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { useTranslation } from "react-i18next"
+import type { Part } from "../../lib/sdk"
+import { DiffView } from "./DiffView"
+import { useTheme } from "../../theme/tokens"
+
+const TOOL_ICONS: Record<string, string> = {
+  read: "glasses-outline",
+  list: "list-outline",
+  glob: "search-outline",
+  grep: "search-outline",
+  webfetch: "globe-outline",
+  edit: "code-slash-outline",
+  write: "create-outline",
+  apply_patch: "git-merge-outline",
+  bash: "terminal-outline",
+  task: "git-branch-outline",
+  todowrite: "checkbox-outline",
+  todoread: "checkbox-outline",
+  question: "chatbubble-ellipses-outline",
+  codesearch: "search-outline",
+  websearch: "globe-outline",
+}
+
+const mono = Platform.OS === "ios" ? "Menlo" : "monospace"
+
+function statusColor(status: string): string {
+  if (status === "completed") return "#22c55e"
+  if (status === "error") return "#ef4444"
+  if (status === "running") return "#f59e0b"
+  return "#888888"
+}
+
+// --- Tool-specific detail renderers ---
+
+function BashDetail({ input, output, isDark }: { input: unknown; output: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const cmd = typeof input === "object" && input !== null ? (input as Record<string, unknown>).command : undefined
+  const out = typeof output === "string" ? output : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof cmd === "string" && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable>
+            <Text style={s.codePrompt}>$ </Text>
+            {cmd}
+          </Text>
+        </View>
+      )}
+      {out !== undefined && out.length > 0 && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2, marginTop: 6 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={80}>
+            {out}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function ReadDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const file = typeof input === "object" && input !== null ? (input as Record<string, unknown>).filePath : undefined
+  const offset = typeof input === "object" && input !== null ? (input as Record<string, unknown>).offset : undefined
+  const limit = typeof input === "object" && input !== null ? (input as Record<string, unknown>).limit : undefined
+  const range = offset || limit ? ` (${offset || 0}..${limit || "end"})` : ""
+  return (
+    <View style={s.detailSection}>
+      {typeof file === "string" && (
+        <Text style={[s.detailFile, { color: theme.accentDeep }]} selectable numberOfLines={2}>
+          {file}
+          {range}
+        </Text>
+      )}
+    </View>
+  )
+}
+
+function WriteDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const file = typeof input === "object" && input !== null ? (input as Record<string, unknown>).filePath : undefined
+  const content = typeof input === "object" && input !== null ? (input as Record<string, unknown>).content : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof file === "string" && (
+        <Text style={[s.detailFile, { color: theme.accentDeep }]} selectable numberOfLines={2}>
+          {file}
+        </Text>
+      )}
+      {typeof content === "string" && content.length > 0 && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2, marginTop: 6 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={40}>
+            {content}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function EditDetail({ input, output, isDark }: { input: unknown; output: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const file = typeof input === "object" && input !== null ? (input as Record<string, unknown>).filePath : undefined
+  const old = typeof input === "object" && input !== null ? (input as Record<string, unknown>).oldString : undefined
+  const replacement =
+    typeof input === "object" && input !== null ? (input as Record<string, unknown>).newString : undefined
+
+  // If we have old/new strings, show as diff
+  if (typeof old === "string" && typeof replacement === "string") {
+    return (
+      <View style={s.detailSection}>
+        {typeof file === "string" && (
+          <Text style={[s.detailFile, { color: theme.accentDeep }]} selectable numberOfLines={2}>
+            {file}
+          </Text>
+        )}
+        <DiffView before={old} after={replacement} isDark={isDark} />
+      </View>
+    )
+  }
+
+  // Fallback: show raw output
+  const text = typeof output === "string" ? output : JSON.stringify(output, null, 2)
+  return (
+    <View style={s.detailSection}>
+      {typeof file === "string" && (
+        <Text style={[s.detailFile, { color: theme.accentDeep }]} selectable numberOfLines={2}>
+          {file}
+        </Text>
+      )}
+      {text && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2, marginTop: 6 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={40}>
+            {text}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function PatchDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const patch = typeof input === "object" && input !== null ? (input as Record<string, unknown>).patch : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof patch === "string" && patch.length > 0 && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={60}>
+            {patch}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function GlobGrepDetail({ input, output, isDark }: { input: unknown; output: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const { t } = useTranslation()
+  const pattern = typeof input === "object" && input !== null ? (input as Record<string, unknown>).pattern : undefined
+  const path = typeof input === "object" && input !== null ? (input as Record<string, unknown>).path : undefined
+  const results = typeof output === "string" ? output : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof pattern === "string" && (
+        <Text style={[s.detailMeta, isDark && s.detailMetaDark]}>
+          {typeof path === "string"
+            ? t("chat.toolCallCard.patternWithPath", { pattern, path })
+            : t("chat.toolCallCard.patternOnly", { pattern })}
+        </Text>
+      )}
+      {results && results.length > 0 && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2, marginTop: 6 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={30}>
+            {results}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function WebfetchDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const url = typeof input === "object" && input !== null ? (input as Record<string, unknown>).url : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof url === "string" && (
+        <Text style={[s.detailFile, { color: theme.accentDeep }]} selectable numberOfLines={3}>
+          {url}
+        </Text>
+      )}
+    </View>
+  )
+}
+
+function TaskDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const description =
+    typeof input === "object" && input !== null ? (input as Record<string, unknown>).description : undefined
+  const prompt = typeof input === "object" && input !== null ? (input as Record<string, unknown>).prompt : undefined
+  return (
+    <View style={s.detailSection}>
+      {typeof description === "string" && <Text style={[s.detailMeta, isDark && s.detailMetaDark]}>{description}</Text>}
+      {typeof prompt === "string" && prompt.length > 0 && (
+        <View style={[s.codeBlock, { backgroundColor: theme.cream2, marginTop: 6 }]}>
+          <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={20}>
+            {prompt}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+}
+
+function TodoDetail({ input, isDark }: { input: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const todos = typeof input === "object" && input !== null ? (input as Record<string, unknown>).todos : undefined
+  if (!Array.isArray(todos)) return null
+  return (
+    <View style={s.detailSection}>
+      {todos.map((t, i) => {
+        const item = t as Record<string, unknown>
+        const done = item.status === "completed"
+        return (
+          <View key={String(item.id || i)} style={s.todoRow}>
+            <Ionicons
+              name={done ? "checkbox" : "square-outline"}
+              size={16}
+              color={done ? "#22c55e" : isDark ? "#666666" : "#999999"}
+            />
+            <Text style={[s.todoText, isDark && s.todoTextDark, done && s.todoDone]} numberOfLines={2}>
+              {String(item.content || item.title || "")}
+            </Text>
+          </View>
+        )
+      })}
+    </View>
+  )
+}
+
+function GenericDetail({ input, output, isDark }: { input: unknown; output: unknown; isDark: boolean }) {
+  const theme = useTheme()
+  const text =
+    typeof output === "string"
+      ? output
+      : output !== undefined && output !== null
+        ? JSON.stringify(output, null, 2)
+        : typeof input === "object" && input !== null
+          ? JSON.stringify(input, null, 2)
+          : undefined
+  if (!text || text.length === 0) return null
+  return (
+    <View style={s.detailSection}>
+      <View style={[s.codeBlock, { backgroundColor: theme.cream2 }]}>
+        <Text style={[s.codePre, isDark && s.codePteDark]} selectable numberOfLines={30}>
+          {text}
+        </Text>
+      </View>
+    </View>
+  )
+}
+
+function ToolDetail({ tool, isDark }: { tool: Part; isDark: boolean }) {
+  const theme = useTheme()
+  const name = tool.tool || ""
+  const input = tool.state?.input
+  const output = tool.state?.output
+
+  switch (name) {
+    case "bash":
+      return <BashDetail input={input} output={output} isDark={isDark} />
+    case "read":
+      return <ReadDetail input={input} isDark={isDark} />
+    case "write":
+      return <WriteDetail input={input} isDark={isDark} />
+    case "edit":
+      return <EditDetail input={input} output={output} isDark={isDark} />
+    case "apply_patch":
+      return <PatchDetail input={input} isDark={isDark} />
+    case "glob":
+    case "grep":
+    case "list":
+    case "codesearch":
+      return <GlobGrepDetail input={input} output={output} isDark={isDark} />
+    case "webfetch":
+    case "websearch":
+      return <WebfetchDetail input={input} isDark={isDark} />
+    case "task":
+      return <TaskDetail input={input} isDark={isDark} />
+    case "todowrite":
+      return <TodoDetail input={input} isDark={isDark} />
+    default:
+      return <GenericDetail input={input} output={output} isDark={isDark} />
+  }
+}
+
+// --- Error display ---
+function ErrorBanner({ message, isDark }: { message: string; isDark: boolean }) {
+  const theme = useTheme()
+  return (
+    <View style={[s.errorBanner]}>
+      <Ionicons name="alert-circle" size={14} color="#ef4444" />
+      <Text style={s.errorText} numberOfLines={3} selectable>
+        {message}
+      </Text>
+    </View>
+  )
+}
+
+// --- Duration display ---
+function duration(start?: number, end?: number): string | null {
+  if (!start || !end) return null
+  const ms = end - start
+  if (ms < 1000) return `${ms}ms`
+  return `${(ms / 1000).toFixed(1)}s`
+}
+
+// --- Main component ---
+interface Props {
+  tool: Part
+  isDark: boolean
+}
+
+// Small chip text for the row: the file/command/url the tool operated on.
+function chipFor(tool: Part): string | null {
+  const input = tool.state?.input
+  if (typeof input === "string") return input
+  if (input && typeof input === "object") {
+    const rec = input as Record<string, unknown>
+    const candidate =
+      rec.filePath ?? rec.file_path ?? rec.path ?? rec.url ?? rec.command ?? rec.argument ?? rec.filename
+    if (typeof candidate === "string") return candidate
+  }
+  return null
+}
+
+export function ToolCallCard({ tool, isDark }: Props) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const [expanded, setExpanded] = useState(false)
+  const icon = (tool.tool && TOOL_ICONS[tool.tool]) || "extension-puzzle-outline"
+  const status = tool.state?.status || "pending"
+  const color = statusColor(status)
+  const error = tool.state?.error?.message
+  const elapsed = duration(tool.state?.time?.start, tool.state?.time?.end)
+  const hasDetail = tool.state?.input !== undefined || tool.state?.output !== undefined || error
+  const chip = chipFor(tool)
+
+  const toggle = useCallback(() => {
+    if (hasDetail) setExpanded((v) => !v)
+  }, [hasDetail])
+
+  return (
+    <View style={s.wrap}>
+      <TouchableOpacity
+        style={s.row}
+        onPress={toggle}
+        activeOpacity={hasDetail ? 0.7 : 1}
+      >
+        <Ionicons name={icon as any} size={13} color={color} style={s.rowIcon} />
+        <Text style={[s.name, { color: theme.ink }]} numberOfLines={1}>
+          {tool.state?.title || tool.tool || t("chat.toolCallCard.fallbackTitle")}
+        </Text>
+        {chip ? (
+          <Text style={[s.chip, { backgroundColor: theme.cream2, color: theme.inkSoft }]} numberOfLines={1}>
+            {chip}
+          </Text>
+        ) : (
+          <View style={{ flex: 1 }} />
+        )}
+        {status === "running" && <ActivityIndicator size="small" color={color} />}
+        {status === "completed" && <Ionicons name="checkmark-circle" size={15} color="#22c55e" />}
+        {status === "error" && <Ionicons name="close-circle" size={15} color="#ef4444" />}
+        {elapsed && <Text style={[s.elapsed, { color: theme.inkFaint }]}>{elapsed}</Text>}
+        {hasDetail && (
+          <Ionicons
+            name={expanded ? "chevron-up" : "chevron-down"}
+            size={14}
+            color={theme.inkFaint}
+          />
+        )}
+      </TouchableOpacity>
+
+      {/* Error banner */}
+      {error && !expanded && <ErrorBanner message={error} isDark={isDark} />}
+
+      {/* Expanded detail — indented under a hairline rule */}
+      {expanded && (
+        <View style={[s.detailWrap, { borderLeftColor: theme.line }]}>
+          <ScrollView style={s.detailScroll} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+            {error && <ErrorBanner message={error} isDark={isDark} />}
+            <ToolDetail tool={tool} isDark={isDark} />
+          </ScrollView>
+        </View>
+      )}
+    </View>
+  )
+}
+
+const s = StyleSheet.create({
+  wrap: { marginTop: 10 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 30,
+    paddingVertical: 3,
+  },
+  rowIcon: { width: 16, flexShrink: 0 },
+  name: { fontSize: 12.5, fontWeight: "500", maxWidth: "42%" },
+  chip: {
+    flex: 1,
+    fontSize: 11.5,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    overflow: "hidden",
+  },
+  cardError: { borderColor: "#fecaca" },
+  cardErrorDark: { borderColor: "#7f1d1d" },
+
+  elapsed: { fontSize: 11, fontVariant: ["tabular-nums"] },
+
+  detailWrap: {
+    borderLeftWidth: 1,
+    marginLeft: 8,
+    paddingLeft: 14,
+    paddingVertical: 4,
+  },
+
+  // Error
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: "#fef2f2",
+    borderRadius: 6,
+  },
+  errorBannerDark: { backgroundColor: "#1a0a0a" },
+  errorText: { fontSize: 12, color: "#dc2626", flex: 1, lineHeight: 18 },
+
+  // Detail
+  detailScroll: { maxHeight: 300, marginTop: 2 },
+  detailSection: { gap: 4 },
+  detailFile: {
+    fontSize: 12,
+    fontFamily: mono,
+    color: "#BC5F3E",
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  detailMeta: { fontSize: 12, color: "#666666", lineHeight: 18 },
+  detailMetaDark: { color: "#888888" },
+
+  // Code block
+  codeBlock: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 6,
+    padding: 10,
+  },
+  codeBlockDark: { backgroundColor: "#1a1a1a" },
+  codePre: {
+    fontSize: 12,
+    fontFamily: mono,
+    color: "#0a0a0a",
+    lineHeight: 18,
+  },
+  codePteDark: { color: "#e5e5e5" },
+  codePrompt: { color: "#D97757", fontWeight: "700" },
+
+  // Todo
+  todoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    paddingVertical: 3,
+  },
+  todoText: { fontSize: 13, color: "#0a0a0a", flex: 1, lineHeight: 20 },
+  todoTextDark: { color: "#e5e5e5" },
+  todoDone: { textDecorationLine: "line-through", color: "#999999" },
+})

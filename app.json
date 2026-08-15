@@ -1,0 +1,99 @@
+{
+  "expo": {
+    "name": "Clix",
+    "slug": "clix-mobile",
+    "version": "0.4.12",
+    "orientation": "portrait",
+    "scheme": "clix",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.clix.mobile",
+      "buildNumber": "1",
+      "entitlements": {
+        "aps-environment": "production"
+      },
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Clix uses speech recognition so you can dictate prompts to your AI coding agent hands-free.",
+        "NSMicrophoneUsageDescription": "Clix uses the microphone to capture your voice when using speech-to-text input.",
+        "NSPhotoLibraryUsageDescription": "Clix can attach images from your photo library to messages to your AI coding agent.",
+        "NSCameraUsageDescription": "Clix can capture images with your camera and attach them to messages to your AI coding agent.",
+        "NSLocalNetworkUsageDescription": "Clix uses your local network to connect to self-hosted opencode servers running on your LAN.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsArbitraryLoadsInWebContent": false
+        },
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.clix.mobile",
+      "versionCode": 39,
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "vibetechnologies",
+          "project": "clix-mobile"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Clix can attach images from your photo library to messages to your AI coding agent.",
+          "cameraPermission": "Clix can capture images with your camera and attach them to messages to your AI coding agent.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Clix uses the microphone to capture your voice when using speech-to-text input.",
+          "speechRecognitionPermission": "Clix uses speech recognition so you can dictate prompts to your AI coding agent hands-free."
+        }
+      ],
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b369f5a8-a8c1-48ed-bbc1-43946dd22202"
+      }
+    },
+    "owner": "bolajiev"
+  }
+}

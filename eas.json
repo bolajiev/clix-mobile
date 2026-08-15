@@ -1,0 +1,58 @@
+{
+  "cli": {
+    "version": ">= 21.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://bbb7086f479979e48d393ad061ac52d3@o4511358238523392.ingest.us.sentry.io/4511910626394112"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://bbb7086f479979e48d393ad061ac52d3@o4511358238523392.ingest.us.sentry.io/4511910626394112"
+      },
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease -PreactNativeArchitectures=arm64-v8a"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "production": {
+      "environment": "production",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "android.enableMinifyInReleaseBuilds": "true",
+        "android.enableShrinkResourcesInReleaseBuilds": "true",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://bbb7086f479979e48d393ad061ac52d3@o4511358238523392.ingest.us.sentry.io/4511910626394112"
+      },
+      "ios": {
+        "distribution": "store",
+        "autoIncrement": "buildNumber"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "YOUR_GOOGLE_ACCOUNT_EMAIL",
+        "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "REPLACE_WITH_APPLE_TEAM_ID"
+      }
+    }
+  }
+}
