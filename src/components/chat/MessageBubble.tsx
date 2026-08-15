@@ -28,7 +28,7 @@ function StreamingCursor() {
     loop.start()
     return () => loop.stop()
   }, [opacity])
-  return <Animated.Text style={{ opacity, color: "#FAB283", fontSize: 14 }}>▍</Animated.Text>
+  return <Animated.Text style={{ opacity, color: "#E08A63", fontSize: 14 }}>▍</Animated.Text>
 }
 
 interface Props {

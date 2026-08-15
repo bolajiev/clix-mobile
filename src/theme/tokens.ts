@@ -51,18 +51,19 @@ const LIGHT: Theme = {
 
 const DARK: Theme = {
   dark: true,
-  // opencode TUI palette: near-black charcoal steps + peach accent
-  cream: "#0A0A0A", // darkStep1 — app background
-  cream2: "#1E1E1E", // darkStep3 — subtle fills: chips, inputs, segmented track
-  card: "#141414", // darkStep2 — cards, sheets, groups
-  line: "#323232", // darkStep5 — hairlines
-  ink: "#EEEEEE", // darkStep12 — primary text
-  inkSoft: "#A0A0A0", // secondary text
-  inkFaint: "#8A8A8A", // AA 5.7:1 on bg — placeholders, chevrons
-  accent: "#FAB283", // darkStep9 — opencode signature peach
-  accentSoft: "#33261C", // peach tint backgrounds
-  accentDeep: "#FFC09F", // darkStep10 — brighter peach on dark
-  trackOff: "#323232",
+  // Theme adopted from remote-for-opencode (DesignTokens.swift dark mode):
+  // warm charcoal, not pure black; clay terracotta accent; warm off-white ink.
+  cream: "#141413", // canvas
+  cream2: "#1F1E1D", // surface
+  card: "#262624", // surfaceRaised
+  line: "#3A3834", // hairline
+  ink: "#F4F0EC", // warm off-white
+  inkSoft: "#B0AEA5", // muted
+  inkFaint: "#87867F", // faint
+  accent: "#E08A63", // clay
+  accentSoft: "#33241B", // clay tint
+  accentDeep: "#F0A882", // brighter clay for text on dark
+  trackOff: "#3A3834",
   serif: FONT_SERIF,
   body: FONT_BODY,
   mono: FONT_MONO,

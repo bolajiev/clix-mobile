@@ -26,7 +26,7 @@ import { useCatalog } from "../src/stores/catalog"
 import type { Session } from "../src/lib/sdk"
 import { Modal, TextInput, Alert } from "react-native"
 
-const PROJECT_DOTS = ["#FAB283", "#8A9A7B", "#7B8FA1", "#B48EAD", "#C9A24B"]
+const PROJECT_DOTS = ["#E08A63", "#8A9A7B", "#7B8FA1", "#B48EAD", "#C9A24B"]
 
 function dotFor(name: string): string {
   let h = 0
@@ -327,9 +327,9 @@ export default function HomeScreen() {
         activeOpacity={0.85}
       >
         {creating ? (
-          <ActivityIndicator size="small" color="#0A0A0A" />
+          <ActivityIndicator size="small" color="#141413" />
         ) : (
-          <Ionicons name="add" size={28} color="#0A0A0A" />
+          <Ionicons name="add" size={28} color="#141413" />
         )}
       </TouchableOpacity>
 
@@ -457,7 +457,7 @@ export default function HomeScreen() {
                   setRenameTarget(null)
                 }}
               >
-                <Text style={{ color: "#0A0A0A", fontWeight: "700" }}>{t("home.rename")}</Text>
+                <Text style={{ color: "#141413", fontWeight: "700" }}>{t("home.rename")}</Text>
               </TouchableOpacity>
             </View>
           </View>
