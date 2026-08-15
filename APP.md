@@ -5,7 +5,7 @@ the AI coding agent. It talks to an opencode server you run yourself and brings
 your agent sessions to your phone: chat, watch tool calls, approve permissions,
 dictate, attach images.
 
-- Repo: `bolajiev/clix-mobile` (standalone, not a fork)
+- Repo: `bolajiev/clix-mobile` (standalone)
 - Package: `com.clix.mobile` · App name: **Clix**
 - Stack: Expo SDK 54, React Native 0.81, expo-router, zustand, SSE-driven chat
 - Design: opencode dark palette (deep blacks + peach `#FAB283`), Claude-style

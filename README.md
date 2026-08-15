@@ -65,7 +65,7 @@ The `preview` profile produces a single arm64 APK; `production` builds a minifie
 
 ## Repository
 
-Clix is a standalone repository (not a fork). It shares the MIT-licensed lineage of `dzianisv/opencode-mobile` — the project it grew from — with a fully independent package (`com.clix.mobile`), design, docs, and roadmap.
+Clix is an independent, standalone repository — MIT-licensed, built from scratch as its own product with its own package (`com.clix.mobile`), design, docs, and roadmap.
 
 ## License
 
